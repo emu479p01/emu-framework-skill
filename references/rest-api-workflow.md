@@ -8,7 +8,7 @@ The default server URL is `http://localhost:3399` unless `PORT` or deployment ro
 
 `POST /api/login` accepts `username` and `password`, then returns an HTTP-only session cookie. Keep one cookie jar or WebRequestSession for subsequent calls. Read credentials only from a user-prepared secure mechanism; never print them or place literal secrets in generated commands, files, logs, or chat.
 
-An unauthenticated request is denied. A valid session still needs Designer/customize scope for metadata and table permissions for Record API calls.
+An unauthenticated request is denied. A valid session still needs App-scoped `canCustomize` for Designer metadata. Runtime Record/View calls separately require `canOpen` plus the matching Role/Privilege permissions.
 
 ## Run preflight discovery
 
@@ -35,9 +35,11 @@ The App-scoped snapshot returns the visible App manifest and Designer artifacts.
 
 `PUT /api/designer/artifacts/:kind/:name` performs an idempotent upsert. URL `kind` and `name` are authoritative. Successful create/update normally returns `200`.
 
+View and Chart are supported artifact kinds in v0.1.1.0. Obtain their exact schemas from capabilities and load [views-and-charts.md](views-and-charts.md) before designing them.
+
 Changes rebuild runtime metadata and additive schema immediately without a restart. Do not use direct mutation endpoints when `capabilities.ai.apply=false`. Do not use a series of direct calls for a multi-artifact feature unless partial completion is acceptable and explicitly authorized.
 
-Always include the fixed target `app`, `model`, and `layer` on artifacts that support them. Omitting `app` targets the default `web` scope and fails for an App-scoped `canCustomize` account.
+Always include the fixed target `app`, `model`, and `layer` on every business artifact that supports them. New Apps have no default Model, and v0.1.1.0 rejects business artifacts without an existing explicit Model.
 
 ## Prefer atomic change sets
 
@@ -78,3 +80,5 @@ Never change `source` from `ai` to `designer` to bypass executable-code restrict
 Use Designer endpoints for metadata. `POST /api/data/:table` creates a business Record and returns `201`, but the authenticated user's table `create` permission, field rules, hooks, and validation still apply.
 
 Obey `capabilities.ai.businessData`. When false, do not call Record APIs. Even when true, require explicit authorization before creating test data and never use real production data casually.
+
+Never call generic Data, import, or export endpoints for security/credential storage: `FW_User`, `FW_UserRole`, `FW_AppAccess`, `FW_Session`, `FW_WebArtifact`, `FW_Migration`, `FW_ViewToken`, or `FW_ViewTokenScope`. User administration, password changes, and View-token lifecycle use dedicated human-administered APIs and are outside normal App-building work.

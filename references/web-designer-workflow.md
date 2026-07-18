@@ -6,15 +6,15 @@ Use this reference for prerequisite setup, human apply, and generated-App verifi
 
 Require the user to complete these steps in Web Designer:
 
-1. Create or select the target App.
-2. Create a dedicated Model and choose its Layer.
+1. Create or select the target App. A new App starts with `models: []`; no App name creates a default Model.
+2. Add a dedicated Model and choose its Layer explicitly.
 3. Create an ordinary dedicated AI-assistance user.
-4. Add one `FW_AppAccess` row for the target App with `canOpen=true` and `canCustomize=true`.
-5. Add only the least-privilege roles needed for later generated-App verification.
+4. Add one `FW_AppAccess` row for the target App with `canCustomize=true`.
+5. Only when runtime verification is requested, add `canOpen=true` and the least-privilege Roles needed for the named verification.
 
 The user must give AI the exact endpoint, environment, App, Model, and Layer. AI verifies but does not create or alter these prerequisites.
 
-Avoid `FW_SystemAdminRole` and `FW_FrameworkUser` for routine AI work because the v0.1.0.2 implementation gives them all-App Designer scope.
+Avoid `FW_SystemAdminRole` and `FW_FrameworkUser` for routine AI work. In v0.1.1.0, System Administrator is the only global bypass and `FW_FrameworkUser` is a legacy marker.
 
 ## Confirm the current design
 
@@ -22,7 +22,7 @@ The AI inspects capabilities and the App-scoped snapshot through REST. In Web De
 
 - App identity and dependencies
 - Model and layer ownership
-- existing tables, enums, forms, menus, reports, Functions, Scripts, and security objects
+- existing tables, enums, Forms, Views, Charts, menus, Reports, Functions, Scripts, and security objects
 - existing Extensions targeting the object
 - visible naming and labeling conventions
 
@@ -54,8 +54,8 @@ Do not copy the base object into CUS merely to add a field or form action. Check
 
 ## Verify through the generated App
 
-Open the App from normal navigation and test the user-visible workflow. Verify menus, list/detail pages, responsive layout, lookups, master-detail lines, reports, and actions affected by the change.
+When runtime verification was explicitly authorized, open the App from normal navigation using an account with both `canOpen` and the required object privileges. Verify menus, list/detail pages, embedded Charts, responsive layout, lookups, master-detail lines, Reports, and actions affected by the change.
 
-Test both allowed and denied roles. Direct navigation or action invocation must still be denied when a menu item or button is hidden. Use safe test records only in an authorized non-production context; otherwise limit verification to metadata and non-mutating UI behavior.
+Test both allowed and denied Roles. Direct navigation, View calls, or action invocation must still be denied when a menu item, Chart, or button is hidden. Use safe test records only in an authorized non-production context; otherwise limit verification to metadata and non-mutating UI behavior.
 
 Return to Web Designer for corrections and repeat preview/apply. Report any UI control, native integration, destructive migration, or deployment requirement that Web Designer cannot safely handle.

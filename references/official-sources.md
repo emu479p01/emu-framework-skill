@@ -21,14 +21,16 @@ Do not silently combine contracts from different versions. If they disagree, fol
 - Extensions: https://github.com/emu479p01/emu-framework-docs/blob/main/developer/extensions.md
 - Functions/actions: https://github.com/emu479p01/emu-framework-docs/blob/main/developer/functions.md
 - Security: https://github.com/emu479p01/emu-framework-docs/blob/main/developer/security.md
+- Views and Charts: https://github.com/emu479p01/emu-framework-docs/blob/main/developer/views-and-charts.md
+- Power BI View API: https://github.com/emu479p01/emu-framework-docs/blob/main/admin/power-bi-view-api.md
 - Testing: https://github.com/emu479p01/emu-framework-docs/blob/main/developer/testing.md
 
 ## Bundled baseline
 
-These references were derived from official EmuFramework documentation version `0.1.0.2 (Beta)`, documentation commit `4d08d944049e8ea77c7bdf163a47efdb50654867`, and framework source commit `8bf9a238aa45541b35803b81f2c6603d122bbbc1`, both inspected on 2026-07-18.
+These references target official EmuFramework documentation and framework source version `0.1.1.0 (Beta)`, inspected together on 2026-07-18. The running instance's capabilities and schemas remain authoritative.
 
 Before relying on version-sensitive details such as Web Designer controls, metadata fields, supported artifact kinds, service limits, or security behavior, verify them against the running instance. If the UI does not reveal the answer, consult current official documentation and state the version used.
 
-## Known v0.1.0.2 documentation mismatch
+## Important v0.1.1.0 security change
 
-The security documentation describes `FW_FrameworkUser` as self-service, but server source grants `FW_FrameworkUser` the same all-App Designer scope check used for `FW_SystemAdminRole`. For AI-assisted work, avoid both roles and use an ordinary account with App-scoped `FW_AppAccess.canCustomize` until the framework resolves or documents this behavior differently.
+`FW_FrameworkUser` no longer grants all-App Designer scope. Use an ordinary account with App-scoped `FW_AppAccess.canCustomize`; add `canOpen` and object Privileges separately only for authorized runtime verification.

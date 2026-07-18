@@ -5,27 +5,29 @@ Use this reference for authorization design, testing, beta risks, and release re
 ## Authorization model
 
 ```text
-User -> Role -> Duty -> Privilege -> table/form/function/report permissions
-User -> App access (open/customize)
+User -> App Access canOpen --------------------------+
+User -> Role -> Duty -> Privilege -> object access -+-> runtime request
+User -> App Access canCustomize ------------------------> Designer only
 ```
 
-A Role may also reference privileges directly. App access is separate from roles and privileges.
+A Role may also reference Privileges directly. Normal runtime authorization is deny-by-default and requires both `canOpen` for the owning App and the matching object permission. App Access is separate from Roles and Privileges.
 
 - Grant table read/create/update/delete operations explicitly.
 - Grant form access separately from table operations.
-- Add every named Function and report to an appropriate privilege.
+- Add every named Function and Report to an appropriate Privilege.
+- Add every View to an appropriate Privilege and grant read permission to all source tables. Chart access is inherited from its View.
 - Assign privileges through duties/roles to real user personas.
 - Test direct API denial; filtered menus and disabled buttons are not security boundaries.
 
-`FW_SystemAdminRole` is the superuser role in v0.1.0.2. The username `admin` has no inherent privilege. Do not use an unrestricted context to bypass authorization.
+`FW_SystemAdminRole` is the only global bypass in v0.1.1.0. The username `admin` has no inherent privilege. `FW_FrameworkUser` is a legacy marker, not a Designer bypass. Do not use an unrestricted context to bypass authorization.
 
 ## Dedicated AI-assistance user
 
-Require an ordinary dedicated user with `FW_AppAccess.canOpen=true` and `canCustomize=true` only for the target App. This account scopes Designer API reads and writes to that App.
+Require an ordinary dedicated user with `FW_AppAccess.canCustomize=true` only for the target App. This account scopes Designer API reads and writes to that App without granting runtime data access.
 
-Do not use `FW_SystemAdminRole` for routine AI work. Do not use `FW_FrameworkUser` for routine AI work in v0.1.0.2: source grants it all-App Designer scope even though documentation describes its data policy as self-service.
+Do not use `FW_SystemAdminRole` or `FW_FrameworkUser` for routine AI work.
 
-App customization permission does not grant business-table CRUD. Assign separate least-privilege roles only for explicitly authorized generated-App verification.
+App customization permission does not grant App entry or business-table CRUD. For explicitly authorized generated-App verification, assign `canOpen=true` and separate least-privilege Roles only for the objects being tested.
 
 ## Minimum test matrix
 
@@ -37,6 +39,7 @@ Test with both an administrator and realistic non-administrator accounts.
 | Tables | allowed and denied CRUD, validation, defaults, update/delete/reference behavior |
 | UI | generated lists/forms, lookups, menu filtering, disabled operations, direct navigation denial |
 | Functions/reports | privilege allowed and denied, direct API denial, invalid inputs, rollback |
+| Views/Charts | App + View + source-read gates, row scopes, parameters, wrong token scope, missing bindings, responsive rendering |
 | Extensions | enabled/disabled, interaction with other Extensions, clean removal |
 | Async integration | success, rejection, timeout, limits, explicit transaction boundaries |
 
@@ -48,6 +51,7 @@ Run focused checks through the generated App while iterating. Reopen affected ob
 - Confirm dependencies for every cross-App reference or Extension.
 - Preview the change set and review every high-risk diff.
 - Test permissions with real user roles, not only a system administrator.
+- Test no Role/no App Access, Role only, App only, Customize only, App plus matching Role, and System Administrator.
 - Test empty and changing dynamic lookup sources plus deleted references.
 - Handle a create-page Function action when no `recordId` exists.
 - Verify async failure and explicit-transaction behavior.

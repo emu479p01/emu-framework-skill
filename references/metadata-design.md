@@ -11,13 +11,15 @@ App
         └── Metadata artifacts
 ```
 
-- App: top-level identity, dependencies, display information, and Models.
-- Model: coherent group of definitions within an App.
+- App: top-level runtime access/navigation boundary plus identity, dependencies, display information, and Models.
+- Model: coherent development-metadata group within an App; it is not a security boundary.
 - Layer: ownership and precedence when multiple sources contribute to the same logical artifact.
 - `name`: stable global identifier; do not treat it as display text.
 - `label`: user-facing text.
 
 Declare cross-app dependencies explicitly. App dependency order controls load order and whether cross-app Extensions are allowed.
+
+Every App created in v0.1.1.0 starts with `models: []`, including names such as `erp`, `erp.credit`, and `web`. The user must add a Model and choose its Layer before creating any business artifact. Put the exact `app`, `model`, and matching `layer` on every supported artifact.
 
 ## Layer order
 
@@ -39,7 +41,7 @@ A higher-layer base artifact replaces a lower-layer base artifact with the same 
 
 Use an Extension when a feature adds fields, indexes, enum values, form behavior, menu items, permissions, or Script behavior and must remain independently removable.
 
-Supported v0.1.0.2 kinds are:
+Supported Extension kinds in v0.1.1.0 are:
 
 ```text
 tableExtension, enumExtension, formExtension, menuExtension,
@@ -60,7 +62,7 @@ Recent canonical names use `<AppPrefix>_<ModelName>_<BaseName>_Extension`. Prese
 
 ## Schema and storage safety
 
-Supported base concepts include Apps, enums, tables, forms, menus, privileges, duties, roles, Scripts, Functions, and reports. Use only object kinds and properties exposed by the running Web Designer version.
+Supported base concepts include Apps, enums, tables, Forms, menus, Privileges, Duties, Roles, Scripts, Functions, Reports, Views, and Charts. Use only object kinds and properties exposed by the running Web Designer version.
 
 Schema synchronization is additive for new tables, fields, and indexes. Removing or changing existing structures requires an explicit migration and verified backup. Never edit generated SQLite structure manually. Do not declare framework audit fields as application fields.
 
@@ -68,7 +70,7 @@ Artifact names are global identities during beta; avoid reusing a name across Ap
 
 ## Atomic change-set flow
 
-Use Web Designer's generated change set for an App plus its dependent tables, forms, menus, and security artifacts:
+Use Web Designer's generated change set for dependent tables, Views, Charts, Forms, menus, and security artifacts inside the user-provided App/Model contract:
 
 1. Inspect the current App, Model, layer, and objects before editing.
 2. Build the smallest ordered set of Web Designer changes.
@@ -85,5 +87,8 @@ Before implementation, confirm:
 - dependencies and target layers
 - enum/table definitions before their consumers
 - form/menu/action targets
-- security artifacts for each table operation, Function, and report
+- View sources, joins, parameters, grouping, Chart output fields, and Form parameter bindings
+- security artifacts for each table operation, Function, Report, and View
 - migration impact and rollback path
+
+Framework/System metadata is visible only to a System Administrator as **Framework — Read-only**. It is never a valid mutation, package, or Extension target.

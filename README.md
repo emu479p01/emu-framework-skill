@@ -20,18 +20,21 @@ Create the App and a dedicated Model, then choose its Layer:
 
 Record the exact App name, Model name, and Layer. The AI will not create or guess them.
 
+In v0.1.1.0, every new App starts with zero Models. Add the Model explicitly; Apps named `erp`, `erp.credit`, or `web` receive no special default.
+
 ### 2. Create a dedicated AI-assistance user
 
 Create an ordinary user specifically for AI-assisted customization. In that user's App Access, grant only the target App and set:
 
 ```text
-canOpen = true
 canCustomize = true
 ```
 
-Avoid assigning `FW_SystemAdminRole` or `FW_FrameworkUser` for routine AI work. In v0.1.0.2 both provide all-App Designer scope in the implementation. A normal user with App-scoped `canCustomize` is safer.
+This is sufficient for Designer inspection and validation. `canCustomize` does not grant App entry or business-data access.
 
-Grant extra table, Function, or report permissions only when verification genuinely requires them.
+Avoid assigning `FW_SystemAdminRole` or `FW_FrameworkUser` for routine AI work. `FW_SystemAdminRole` is the only global bypass; `FW_FrameworkUser` is a legacy marker in v0.1.1.0.
+
+Only when generated-App verification is genuinely required, add `canOpen=true` plus the minimum Role/Privilege permissions for the Forms, tables, Functions, Reports, or Views being tested.
 
 ### 3. Prepare authentication securely
 
@@ -47,7 +50,7 @@ Environment: development
 App: sales
 Model: AICustomizations
 Layer: CUS
-AI user: created with canOpen=true and canCustomize=true for sales
+AI user: created with canCustomize=true for sales; no runtime access
 Request: Add a delivery note field to the order table and form.
 ```
 
@@ -85,7 +88,7 @@ Start a new Codex task after installation.
 
 ## API support
 
-EmuFramework v0.1.0.2 supports:
+EmuFramework v0.1.1.0 supports:
 
 - `POST /api/designer/artifacts` — create one metadata artifact; success `201`, duplicate `409`
 - `PUT /api/designer/artifacts/:kind/:name` — idempotent upsert
@@ -94,11 +97,16 @@ EmuFramework v0.1.0.2 supports:
 - `POST /api/designer/change-sets/validate` — atomic validation and preview
 - `POST /api/designer/change-sets/apply` — human-confirmed apply when policy permits
 - `POST /api/data/:table` — create a business Record when table permissions permit
+- `GET /api/views/:name/schema` — inspect a permitted View contract
+- `GET /api/views/:name/data` — execute a permitted declarative View with typed parameters and paging
+- `GET /api/views/:name/export?format=csv` — export a permitted View under the configured row cap
 
 The Skill prefers the change-set workflow because several direct artifact calls can leave a partially completed design if a later call fails.
 
-In v0.1.0.2, the capabilities response declares AI inspection and validation support while AI apply, business-data access, and executable Scripts are disabled. The Skill obeys those runtime flags rather than bypassing them. The human owns apply confirmation.
+View and Chart are supported metadata artifact kinds in v0.1.1.0. Interactive View verification requires all three runtime gates: `canOpen`, a View Privilege, and read permission for every source table. Chart access is inherited from its View. Power BI service tokens remain human-administered and outside the Skill's secret handling.
+
+In v0.1.1.0, the capabilities response declares AI inspection and validation support while AI apply, business-data access, and executable Scripts are disabled. The Skill obeys those runtime flags rather than bypassing them. The human owns apply confirmation.
 
 ## Documentation baseline
 
-The bundled guidance is based on official [EmuFramework documentation](https://github.com/emu479p01/emu-framework-docs) and framework source version `0.1.0.2 (Beta)`. The running instance's capabilities and schemas are authoritative.
+The bundled guidance is based on official [EmuFramework documentation](https://github.com/emu479p01/emu-framework-docs) and framework source version `0.1.1.0 (Beta)`. The running instance's capabilities and schemas are authoritative.

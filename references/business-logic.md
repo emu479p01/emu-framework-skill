@@ -27,7 +27,7 @@ Pre-events can cancel. Post-events cannot cancel a completed operation. Referenc
 
 ## Scripts
 
-Use a Script as a short deterministic registration unit. In v0.1.0.2, dynamic Script code receives only `kernel`, `ValidationError`, and `DataEventCancelled`; do not assume arbitrary imports or globals. Register hooks/events/actions through the kernel.
+Use a Script as a short deterministic registration unit. In v0.1.1.0, dynamic Script code receives only `kernel`, `ValidationError`, and `DataEventCancelled`; do not assume arbitrary imports or globals. Register hooks/events/actions through the kernel.
 
 - Keep names unique and do not rely on incidental registration order.
 - Use the authenticated context supplied to handlers.
@@ -53,7 +53,7 @@ Rules:
 - Return correctable problems as `ValidationError` when supported.
 - Do not expose secrets, SQL details, internal stacks, remote sensitive headers, or bodies.
 
-## Bounded services in v0.1.0.2
+## Bounded services in v0.1.1.0
 
 `services.http.request(...)` supports HTTP/HTTPS, headers, JSON or text bodies, and a bounded timeout. The documented default timeout is 15 seconds, the maximum is 60 seconds, and responses over 5 MB reject. Non-success HTTP status does not reject automatically; check `ok` or `status`.
 
