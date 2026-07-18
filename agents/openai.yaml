@@ -1,4 +1,4 @@
 interface:
-  display_name: "Build Apps in Emu Web Designer"
-  short_description: "Build Apps through EmuFramework Web Designer"
-  default_prompt: "Use $build-emu-framework-apps to build or customize an App through my running EmuFramework Web Designer."
+  display_name: "Build Apps with Emu Designer API"
+  short_description: "Build scoped Apps through the Emu Designer API"
+  default_prompt: "Use $build-emu-framework-apps with my endpoint, environment, App, Model, and Layer to prepare and validate a scoped EmuFramework change set."

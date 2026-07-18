@@ -28,3 +28,7 @@ Do not silently combine contracts from different versions. If they disagree, fol
 These references were derived from official EmuFramework documentation version `0.1.0.2 (Beta)`, documentation commit `4d08d944049e8ea77c7bdf163a47efdb50654867`, and framework source commit `8bf9a238aa45541b35803b81f2c6603d122bbbc1`, both inspected on 2026-07-18.
 
 Before relying on version-sensitive details such as Web Designer controls, metadata fields, supported artifact kinds, service limits, or security behavior, verify them against the running instance. If the UI does not reveal the answer, consult current official documentation and state the version used.
+
+## Known v0.1.0.2 documentation mismatch
+
+The security documentation describes `FW_FrameworkUser` as self-service, but server source grants `FW_FrameworkUser` the same all-App Designer scope check used for `FW_SystemAdminRole`. For AI-assisted work, avoid both roles and use an ordinary account with App-scoped `FW_AppAccess.canCustomize` until the framework resolves or documents this behavior differently.

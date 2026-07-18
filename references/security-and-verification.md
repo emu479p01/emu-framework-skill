@@ -19,6 +19,14 @@ A Role may also reference privileges directly. App access is separate from roles
 
 `FW_SystemAdminRole` is the superuser role in v0.1.0.2. The username `admin` has no inherent privilege. Do not use an unrestricted context to bypass authorization.
 
+## Dedicated AI-assistance user
+
+Require an ordinary dedicated user with `FW_AppAccess.canOpen=true` and `canCustomize=true` only for the target App. This account scopes Designer API reads and writes to that App.
+
+Do not use `FW_SystemAdminRole` for routine AI work. Do not use `FW_FrameworkUser` for routine AI work in v0.1.0.2: source grants it all-App Designer scope even though documentation describes its data policy as self-service.
+
+App customization permission does not grant business-table CRUD. Assign separate least-privilege roles only for explicitly authorized generated-App verification.
+
 ## Minimum test matrix
 
 Test with both an administrator and realistic non-administrator accounts.

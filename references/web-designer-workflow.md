@@ -1,20 +1,24 @@
 # Web Designer workflow
 
-Use this reference for browser interaction, object creation order, preview/apply behavior, and generated-App verification.
+Use this reference for prerequisite setup, human apply, and generated-App verification around the REST API workflow.
 
-## Connect and authenticate
+## Provision the AI-assisted workspace
 
-1. Use the EmuFramework base URL supplied by the user or an existing relevant browser tab.
-2. Confirm whether the instance is development, staging, or production.
-3. Navigate through the visible application shell; do not invent a Web Designer route.
-4. If authentication is required, pause and ask the user to sign in in the selected browser.
-5. Open Web Designer and confirm Designer permission for the target App.
+Require the user to complete these steps in Web Designer:
 
-Keep the user's signed-in browser session isolated to the requested endpoint. Do not inspect credentials, cookies, local storage, or unrelated tabs.
+1. Create or select the target App.
+2. Create a dedicated Model and choose its Layer.
+3. Create an ordinary dedicated AI-assistance user.
+4. Add one `FW_AppAccess` row for the target App with `canOpen=true` and `canCustomize=true`.
+5. Add only the least-privilege roles needed for later generated-App verification.
 
-## Inspect the current design
+The user must give AI the exact endpoint, environment, App, Model, and Layer. AI verifies but does not create or alter these prerequisites.
 
-Select the App and Model before editing. Inspect:
+Avoid `FW_SystemAdminRole` and `FW_FrameworkUser` for routine AI work because the v0.1.0.2 implementation gives them all-App Designer scope.
+
+## Confirm the current design
+
+The AI inspects capabilities and the App-scoped snapshot through REST. In Web Designer, the user can confirm:
 
 - App identity and dependencies
 - Model and layer ownership
@@ -22,25 +26,17 @@ Select the App and Model before editing. Inspect:
 - existing Extensions targeting the object
 - visible naming and labeling conventions
 
-Use the UI state as the schema for the installed version. Do not assume a control exists because it appears in a newer document.
+Use the API schemas returned by the running instance as the machine contract and the UI state as human confirmation. Do not assume a control or field exists because it appears in a newer document.
 
-## Create in dependency order
+## Review and apply a validated change set
 
-Use this order so references resolve:
+When AI returns a valid preview:
 
-1. App
-2. Model and layer
-3. Enums
-4. Tables, fields, references, and indexes
-5. Forms and reports
-6. Menus
-7. Privileges
-8. Duties
-9. Roles
-10. App access and user assignment
-11. Scripts, Functions, hooks, and form actions
-
-Use Simple Builder when a new table, form, and menu can be created together. Inspect every generated name and object before saving.
+1. Confirm the endpoint, environment, App, Model, Layer, and preview owner.
+2. Review every diff, warning, schema effect, destructive flag, and high-risk item.
+3. Submit apply as a human using the same dedicated username. Use Web Designer when the installed version exposes the preview; otherwise use a human-controlled API request.
+4. Do not approve a changed, expired, or differently scoped preview.
+5. Tell AI when apply completes so it can refresh the snapshot.
 
 ## Configure visible objects
 
@@ -55,17 +51,6 @@ For menus, target an accessible Form, Function, Report, route, or submenu. Menu 
 Use an Extension for an additive change to an existing object. The source layer must be strictly higher than the target layer. A cross-App Extension requires the dependency to be declared. Use the Designer-generated name unless the existing installation requires a preserved legacy identity.
 
 Do not copy the base object into CUS merely to add a field or form action. Check whether the same App/Model already contributes an Extension of that kind to the target before creating another.
-
-## Save, preview, and apply
-
-1. Save the draft through Web Designer.
-2. Read the generated change-set preview completely.
-3. Verify object names, kinds, App/Model/layer, targets, dependencies, and security contributions.
-4. Resolve warnings and inspect every destructive or high-risk flag.
-5. Apply when the task and environment authorize it; otherwise request explicit approval with a concise preview summary.
-6. Wait for completion and inspect the resulting Designer state.
-
-Do not apply when the visible target differs from the requested endpoint, App, environment, or preview.
 
 ## Verify through the generated App
 
