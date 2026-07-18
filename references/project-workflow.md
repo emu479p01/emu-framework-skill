@@ -39,6 +39,22 @@ The framework MCP intentionally does not apply changes, delete artifacts, execut
 
 Do not mix ownership casually. Keep the base solution source-controlled and use an appropriate higher layer for customer-specific customization.
 
+## Connect to a running App
+
+Ask for an endpoint only when the work requires Web Designer or Metadata API access to a running environment and it cannot be discovered safely from the provided context.
+
+Collect the minimum connection contract:
+
+- App base URL, without asking the user to expose credentials in it
+- environment classification: development, staging, or production
+- target App, Model, and intended layer
+- existing supported authentication/session mechanism
+- whether the user authorizes read-only inspection, preview, or apply
+
+Never ask the user to paste a password, token, cookie, integration key, or setup code into chat. Prefer an existing signed-in browser/session, a connected tool, or a secret configured outside model context.
+
+Before mutation, verify the server/framework version and authenticated identity, inspect the current snapshot/revision, validate the change set, show the effective target and high-risk diff, and obtain explicit apply approval. Do not carry authorization from one endpoint or environment to another.
+
 ## Build in reference order
 
 1. Create the App manifest and declare `dependsOn`.

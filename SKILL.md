@@ -1,6 +1,6 @@
 ---
 name: build-emu-framework-apps
-description: Develop, extend, debug, review, and test metadata-driven applications built with EmuFramework. Use when Codex works in an EmuFramework repository or must create or modify Apps, Models, tables, enums, forms, menus, reports, security metadata, Extensions, hooks, Scripts, Functions/actions, Web Designer artifacts, CLI or MCP change sets, or application tests. Also use to diagnose metadata validation, layers, dependencies, permissions, transactions, and generated UI behavior. Do not use for unrelated framework-core maintenance.
+description: Develop, extend, debug, review, and test metadata-driven applications built with EmuFramework. Use when Codex works in an EmuFramework repository or a running Web Designer/Metadata API environment, or must create or modify Apps, Models, tables, enums, forms, menus, reports, security metadata, Extensions, hooks, Scripts, Functions/actions, CLI or MCP change sets, or application tests. Also use to diagnose metadata validation, layers, dependencies, permissions, transactions, and generated UI behavior. Do not use for unrelated framework-core maintenance.
 ---
 
 # Build EmuFramework Apps
@@ -31,8 +31,24 @@ Clarify or infer the smallest complete requirement set:
 - forms, menus, reports, and action placement
 - user personas and allowed table operations, Functions, reports, and app access
 - acceptance cases, including denied and failure paths
+- authoring target: local source files or a running App environment
 
 State material assumptions. Avoid inventing fields, permissions, or destructive migrations from vague requirements.
+
+## Resolve a runtime target only when needed
+
+Do not ask for an endpoint when the task is file-based, local, planning-only, or review-only.
+
+For Web Designer or Metadata API customization against a running App:
+
+1. Discover the base URL and environment from user context or safe workspace configuration first.
+2. If unavailable, ask for the App base URL and whether it is development, staging, or production.
+3. Confirm the target App, Model, layer, and intended authoring channel.
+4. Ask the user to provide an already authenticated session or configure credentials through the supported secure mechanism. Never request passwords, session cookies, API tokens, or secret values in chat.
+5. Perform read-only discovery first and confirm the framework version, target identity, permissions, current revision, and backup expectations.
+6. Validate and preview the exact change set before requesting approval to apply it.
+
+Treat production as read-only unless the user explicitly authorizes the specific mutation after reviewing its target and preview. Never reuse an endpoint, session, or approval for a different environment.
 
 ## Load the relevant guidance
 
