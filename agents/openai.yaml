@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build EmuFramework Apps"
+  short_description: "Build secure EmuFramework metadata apps"
+  default_prompt: "Use $build-emu-framework-apps to build a secure, validated EmuFramework application from these requirements."
