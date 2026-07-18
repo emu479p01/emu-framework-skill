@@ -1,15 +1,15 @@
 # Official sources and freshness
 
-Use this reference only when exact current behavior is not available from the target workspace or when the installed framework version differs from the baseline below.
+Use this reference only when exact current behavior is not visible in the running Web Designer or when the installed framework version differs from the baseline below.
 
 ## Source priority
 
-1. Target repository instructions, installed version, CLI help, live schemas, diagnostics, and existing valid artifacts.
-2. Connected Emu MCP schemas and workspace resources from the same checkout.
-3. Official documentation matching the installed version.
-4. Official framework source and tests matching the installed version.
+1. Controls, validation, diagnostics, and effective objects visible in the target Web Designer.
+2. The running instance's displayed version and behavior.
+3. Official documentation matching that installed version.
+4. Official framework source and tests for that version when documentation is insufficient.
 
-Do not silently combine contracts from different versions. If they disagree, follow the target workspace and explain the mismatch.
+Do not silently combine contracts from different versions. If they disagree, follow the running instance and explain the mismatch.
 
 ## Canonical repositories
 
@@ -27,4 +27,4 @@ Do not silently combine contracts from different versions. If they disagree, fol
 
 These references were derived from official EmuFramework documentation version `0.1.0.2 (Beta)`, documentation commit `4d08d944049e8ea77c7bdf163a47efdb50654867`, and framework source commit `8bf9a238aa45541b35803b81f2c6603d122bbbc1`, both inspected on 2026-07-18.
 
-Before relying on version-sensitive details such as CLI syntax, schema fields, supported artifact kinds, service limits, or security behavior, verify them against the target checkout. When no checkout is present, consult the current official repository and state the version used.
+Before relying on version-sensitive details such as Web Designer controls, metadata fields, supported artifact kinds, service limits, or security behavior, verify them against the running instance. If the UI does not reveal the answer, consult current official documentation and state the version used.

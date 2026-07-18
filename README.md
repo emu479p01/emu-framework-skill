@@ -1,18 +1,26 @@
-# Build EmuFramework Apps
+# Build EmuFramework Apps in Web Designer
 
-An Agent Skill for building, extending, reviewing, and testing secure metadata-driven applications with [EmuFramework](https://github.com/emu479p01/emu-framework).
+An Agent Skill for people who already have [EmuFramework](https://github.com/emu479p01/emu-framework) installed and running, and want AI to build or customize an App through Web Designer.
 
-The Skill is designed for AI coding agents that need to work efficiently with EmuFramework Apps, Models, layers, metadata, Extensions, Functions, Scripts, security, CLI/MCP tooling, and Web Designer or Metadata API customizations.
+This Skill is not an EmuFramework installer and is not primarily a source-code or CLI workflow. It guides an AI agent to connect to your running EmuFramework endpoint, use your authenticated browser session, make metadata changes in Web Designer, review the generated change set, and verify the result in the generated App.
 
-## Why use this Skill?
+## What it can do
 
-- Uses the target workspace's live schema and diagnostics instead of guessing metadata properties.
-- Builds artifacts in dependency order.
-- Selects the smallest appropriate business-logic mechanism.
-- Preserves App, Model, layer, dependency, and Extension boundaries.
-- Treats client visibility as usability rather than authorization.
-- Validates and previews multi-artifact change sets before applying them.
-- Loads detailed references only when relevant to reduce token usage.
+- Create an App and Model through Web Designer.
+- Create tables, enums, fields, references, indexes, forms, menus, reports, and security objects.
+- Extend an existing App with removable higher-layer Extensions.
+- Add Scripts, Functions/actions, hooks, validation, HTTP, or email behavior supported by Web Designer.
+- Review warnings and high-risk changes before applying them.
+- Test generated menus, lists, forms, actions, permissions, and failure paths.
+
+## Prerequisites
+
+- A running EmuFramework instance.
+- Its base URL, such as a local, development, staging, or production endpoint.
+- A user account with Web Designer permission for the target App.
+- An AI client with access to an interactive browser session.
+
+Sign in yourself when the browser asks. Never paste passwords, API tokens, cookies, setup codes, or integration keys into the conversation.
 
 ## Install
 
@@ -36,46 +44,44 @@ Start a new Codex task after installation so the Skill can be discovered.
 
 ## Use
 
-Invoke it explicitly with `$build-emu-framework-apps`:
+Give the AI your EmuFramework endpoint and the outcome you want:
 
 ```text
-Use $build-emu-framework-apps to build a source-controlled inventory App
-with transfer actions and clerk/manager permissions.
+Use $build-emu-framework-apps with http://localhost:3399 to create an
+inventory App in Web Designer with products, stock transfers, and
+separate clerk and manager permissions.
 ```
 
 ```text
-Use $build-emu-framework-apps to add a removable CUS Extension to the
-existing sales App and verify its security and migration risks.
+Use $build-emu-framework-apps to customize our running sales App through
+Web Designer. Add a removable CUS field and show it on the order form.
 ```
 
-The Skill may also be selected implicitly when a task clearly involves EmuFramework application development.
+If you do not provide an endpoint and no relevant browser tab is open, the Skill asks for the EmuFramework base URL and whether the environment is development, staging, or production before it starts.
 
-## Runtime endpoint behavior
+## Workflow
 
-The Skill does not ask for an endpoint for local repository work, planning, or review.
+1. Connect to the running EmuFramework instance.
+2. Let you sign in if needed.
+3. Inspect the existing App, Model, layer, dependencies, and objects.
+4. Plan the smallest complete metadata change.
+5. Build it through Web Designer.
+6. Review the generated change-set preview and warnings.
+7. Apply changes with environment-appropriate approval.
+8. Open the generated App and verify the result.
 
-When customization requires a running Web Designer or Metadata API environment, the Skill first tries to discover the target from the provided context. If it cannot, it asks for:
+For a named development or staging instance, an in-scope additive change can proceed after a clean preview. Production, unknown environments, destructive/high-risk previews, and scope expansions require explicit approval before apply.
 
-- the App base URL
-- whether the environment is development, staging, or production
-- the target App, Model, and layer
-- an existing supported authentication/session method
-- whether the requested scope is inspection, preview, or apply
+## Token-efficient design
 
-Do not paste passwords, API tokens, cookies, setup codes, or integration keys into the conversation. Use an existing authenticated browser/session, connected tool, or secrets configured outside AI context.
+The core workflow stays in `SKILL.md`. Detailed guidance is loaded only when needed:
 
-Production remains read-only until the user explicitly approves the exact target and validated preview.
-
-## How it stays token-efficient
-
-`SKILL.md` contains the core workflow and routes the agent to focused references only when needed:
-
-- `references/project-workflow.md` — repository, CLI/MCP, authoring channels, and runtime endpoints
-- `references/metadata-design.md` — Apps, Models, layers, schemas, and Extensions
-- `references/business-logic.md` — hooks, events, Scripts, Functions, and transactions
-- `references/security-and-verification.md` — authorization, tests, and release safety
-- `references/official-sources.md` — source priority, version baseline, and freshness
+- `references/web-designer-workflow.md` — browser and Web Designer procedure
+- `references/metadata-design.md` — Apps, Models, layers, naming, and Extensions
+- `references/business-logic.md` — Scripts, Functions, hooks, and transactions
+- `references/security-and-verification.md` — authorization and testing
+- `references/official-sources.md` — version baseline and current sources
 
 ## Documentation baseline
 
-The bundled guidance was derived from the official [EmuFramework documentation](https://github.com/emu479p01/emu-framework-docs) for version `0.1.0.2 (Beta)`. The installed workspace version, live schemas, CLI help, and diagnostics always take priority over bundled examples.
+The bundled guidance was derived from the official [EmuFramework documentation](https://github.com/emu479p01/emu-framework-docs) for version `0.1.0.2 (Beta)`. The behavior and controls visible in the running instance take priority over bundled examples.

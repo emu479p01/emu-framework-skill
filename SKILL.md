@@ -1,74 +1,69 @@
 ---
 name: build-emu-framework-apps
-description: Develop, extend, debug, review, and test metadata-driven applications built with EmuFramework. Use when Codex works in an EmuFramework repository or a running Web Designer/Metadata API environment, or must create or modify Apps, Models, tables, enums, forms, menus, reports, security metadata, Extensions, hooks, Scripts, Functions/actions, CLI or MCP change sets, or application tests. Also use to diagnose metadata validation, layers, dependencies, permissions, transactions, and generated UI behavior. Do not use for unrelated framework-core maintenance.
+description: Operate an already installed and running EmuFramework instance through its Web Designer to create, customize, debug, and verify metadata-driven Apps. Use when the user wants AI to open an EmuFramework endpoint and build or modify Apps, Models, tables, enums, forms, menus, reports, security artifacts, Extensions, Scripts, Functions/actions, hooks, or related metadata in Web Designer. Also use to inspect change-set previews and test generated Apps. Do not use for installing EmuFramework or editing framework source unless the user explicitly asks.
 ---
 
-# Build EmuFramework Apps
+# Build EmuFramework Apps in Web Designer
 
-Build applications against the workspace's installed EmuFramework version. Treat local schemas and diagnostics as authoritative; use bundled references for workflow and design rules.
+Develop against the user's running EmuFramework instance. Use Web Designer as the primary authoring surface and the generated App as the verification surface.
 
-## Orient before editing
+## Connect to the instance
 
-1. Read repository instructions and inspect `git status`.
-2. Find the workspace root, `package.json`, `pnpm-workspace.yaml`, `apps/`, and the target app's `app.json`.
-3. Determine the installed framework version from the root and relevant package manifests.
-4. Prefer the framework's compact inspection surfaces over reading many files:
-   - Run `pnpm emu --help` before assuming command syntax.
-   - If supported, run `pnpm emu inspect --json` for the workspace summary.
-   - If Emu MCP is connected, use `inspect_workspace`, then `inspect_app` only for the target app.
-5. Read only target artifacts and direct dependencies. Expand inspection when diagnostics or cross-references require it.
+1. Reuse an EmuFramework URL or relevant open browser tab already supplied for this task.
+2. If none is available, ask for the EmuFramework base URL and whether the instance is development, staging, or production. This is required before UI work.
+3. Open the URL with an available browser-control surface that can preserve the user's signed-in session.
+4. If sign-in is required, ask the user to sign in in that browser and tell you when it is ready. Never request, inspect, or enter their password, token, cookie, setup code, or secret.
+5. Confirm that the visible instance is the intended environment and that the signed-in user can open Web Designer for the target App.
 
-Never read secrets, production business data, or database files merely to understand metadata.
+Do not bypass Web Designer with CLI, source-file edits, direct database changes, or Metadata API mutations unless the user explicitly requests that different workflow.
 
-## Establish the contract
+## Establish the requested outcome
 
-Clarify or infer the smallest complete requirement set:
+Inspect the current Web Designer state before asking questions that the UI can answer. Determine:
 
-- app boundary and dependencies
-- Model and ownership layer
-- stable identifier prefix and user-facing labels
-- records, relationships, lifecycle rules, and user operations
-- forms, menus, reports, and action placement
-- user personas and allowed table operations, Functions, reports, and app access
+- whether to create a new App or customize an existing App
+- target App, Model, and ownership layer
+- stable naming prefix and user-facing labels
+- tables, relationships, forms, menus, reports, and actions
+- business rules and explicit user operations
+- user personas and allowed table operations, Functions, reports, and App access
 - acceptance cases, including denied and failure paths
-- authoring target: local source files or a running App environment
 
-State material assumptions. Avoid inventing fields, permissions, or destructive migrations from vague requirements.
+Ask only for missing choices that materially change the design. State any consequential assumption before applying it.
 
-## Resolve a runtime target only when needed
+## Load focused guidance
 
-Do not ask for an endpoint when the task is file-based, local, planning-only, or review-only.
-
-For Web Designer or Metadata API customization against a running App:
-
-1. Discover the base URL and environment from user context or safe workspace configuration first.
-2. If unavailable, ask for the App base URL and whether it is development, staging, or production.
-3. Confirm the target App, Model, layer, and intended authoring channel.
-4. Ask the user to provide an already authenticated session or configure credentials through the supported secure mechanism. Never request passwords, session cookies, API tokens, or secret values in chat.
-5. Perform read-only discovery first and confirm the framework version, target identity, permissions, current revision, and backup expectations.
-6. Validate and preview the exact change set before requesting approval to apply it.
-
-Treat production as read-only unless the user explicitly authorizes the specific mutation after reviewing its target and preview. Never reuse an endpoint, session, or approval for a different environment.
-
-## Load the relevant guidance
-
-- Read [references/project-workflow.md](references/project-workflow.md) for a new app, repository discovery, authoring channel, CLI/MCP use, or build order.
-- Read [references/metadata-design.md](references/metadata-design.md) for Apps, Models, layers, naming, metadata, change sets, or Extensions.
-- Read [references/business-logic.md](references/business-logic.md) for hooks, events, Scripts, Functions, actions, transactions, HTTP, or email.
-- Read [references/security-and-verification.md](references/security-and-verification.md) for permissions, testing, release review, schema risk, or deployment readiness.
-- Read [references/official-sources.md](references/official-sources.md) when the local version differs from the documented baseline, the local schema is unavailable, or a current framework fact must be verified.
+- Read [references/web-designer-workflow.md](references/web-designer-workflow.md) for browser navigation, Web Designer object order, Simple Builder, saving, previewing, and applying changes.
+- Read [references/metadata-design.md](references/metadata-design.md) for Apps, Models, layers, naming, metadata identity, and Extensions.
+- Read [references/business-logic.md](references/business-logic.md) for hooks, events, Scripts, Functions/actions, transactions, HTTP, or email.
+- Read [references/security-and-verification.md](references/security-and-verification.md) for permissions, testing, schema risk, or release readiness.
+- Read [references/official-sources.md](references/official-sources.md) only when visible behavior differs from the bundled baseline or a current framework fact must be verified.
 
 Do not load every reference by default.
 
+## Inspect before changing
+
+Within Web Designer:
+
+1. Select the target App and Model.
+2. Inspect the App dependencies, Model layer, existing objects, and naming conventions.
+3. Open each artifact that will be changed and identify its current effective definition.
+4. Check whether an existing higher-layer Extension already targets it.
+5. Avoid reading production business records unless verification requires specific test data and the user has authorized that access.
+
+Prefer additive changes. Never recreate or copy a base artifact merely to add supported fields, layout, menu, security, or Script behavior.
+
 ## Design in dependency order
 
-Create an artifact graph before implementation:
+Plan the smallest complete object graph:
 
 ```text
-App -> Models/layers -> Enums -> Tables/fields/indexes
+App -> Model/layer -> Enums -> Tables/fields/indexes
     -> Forms/reports -> Menus -> Privileges -> Duties -> Roles -> App access
 Tables -> Hooks/Scripts/Functions -> Privileges
 ```
+
+For an existing App, use an Extension when the change is additive and independently removable. Put the Extension in a strictly higher layer and declare any required cross-App dependency.
 
 Choose the smallest behavior mechanism:
 
@@ -76,57 +71,48 @@ Choose the smallest behavior mechanism:
 - Use a data event for lifecycle reactions.
 - Use a Function for one explicit named operation.
 - Use a Script for a small set of related registrations.
-- Use reviewed TypeScript for complex reusable or native integration logic.
+- Report that reviewed TypeScript is required when Web Designer cannot safely express complex native or reusable integration logic.
 
-Prefer an Extension for additive, independently removable customization. Replace a lower-layer base artifact only when the higher layer intentionally owns the complete definition.
+## Implement through Web Designer
 
-## Use the live schema
+1. Use Simple Builder when it can create the required table, form, and menu together.
+2. Otherwise create objects in dependency order so each reference already exists.
+3. Use names as stable identifiers and labels as display text.
+4. Configure field types, requirements, references, delete behavior, lookups, form groups/lines/actions, menus, and reports from visible controls.
+5. Add Privileges, Duties, Roles, and App access; do not rely on hidden menu items or buttons for authorization.
+6. Add Scripts or Functions only after their tables and security design are known.
+7. Save the draft and inspect the generated change-set preview, warnings, and high-risk flags.
+8. Correct every unexpected dependency, layer, reference, schema, or permission issue before applying.
 
-Never guess metadata properties from memory or bundled examples.
+Do not invent UI controls or metadata fields that are not present in the running version. Reinspect the page after navigation or save because Web Designer state may change.
 
-1. Prefer `emu://schema/metadata` and `emu://schema/change-set` when Emu MCP resources are available.
-2. Otherwise use `pnpm emu schema` when listed by local CLI help.
-3. Otherwise inspect the installed schema/types and nearby valid artifacts from the same framework version.
-4. Use official current documentation only as a fallback; reconcile it with the installed version.
+## Apply with the right authority
 
-Generate or edit the minimum set of artifacts. Preserve existing formatting and naming conventions. Do not declare framework audit fields (`id`, `createdAt`, `createdBy`, `modifiedAt`, `modifiedBy`) as application fields.
+Treat the user's request to build or customize a named development/staging instance as authorization for in-scope, additive Web Designer changes when the preview contains no unexpected or high-risk diff.
 
-## Validate before applying
+Ask for explicit approval before applying when any of these is true:
 
-For a multi-artifact change, prefer one atomic MetadataChangeSet.
+- the instance is production or its environment is unknown
+- the preview is destructive or high risk
+- the change expands beyond the requested App or feature
+- the target, layer, dependency, or migration effect is ambiguous
 
-1. Inspect the current workspace revision.
-2. Validate and preview without mutation, using `validate_change_set` or the local CLI equivalent.
-3. Resolve every schema, reference, dependency, layer, naming, and permission diagnostic.
-4. Review the diff and all high-risk flags.
-5. Apply only after the user has authorized mutation and the preview matches the intended scope.
+Never carry approval from one endpoint, environment, App, or preview to another.
 
-Do not use an apply command as a substitute for file editing when the user asked only for a plan, review, or diagnosis.
+## Verify the generated App
 
-## Preserve runtime invariants
+After applying:
 
-- Route data access through the authenticated framework `DataContext`.
-- Treat client visibility as usability, never authorization.
-- Keep transactional Functions synchronous and atomic.
-- Use async Functions for awaited HTTP or email work; place database changes in short synchronous `ctx.tts()` blocks.
-- Never await network I/O inside a database transaction.
-- Keep credentials out of metadata, source, logs, and responses.
-- Treat Scripts and Functions as trusted administrative code requiring review.
-- Plan explicit migrations and verified backups for removals or structural changes; schema synchronization is additive.
+1. Open the generated App through its normal navigation.
+2. Verify menus, lists, forms, lookups, defaults, actions, reports, and responsive behavior relevant to the change.
+3. Test valid input, validation failure, update/delete/reference behavior, and rollback.
+4. Test with realistic allowed and denied roles; a System Administrator result does not prove least privilege.
+5. Test an Extension enabled and disabled when the UI supports that lifecycle.
+6. For async Functions, test service failures, timeouts, non-success responses, and database state around explicit transactions.
+7. Return to Web Designer and fix defects through the same preview/apply workflow.
 
-## Verify proportionally
-
-Run focused checks first, then the repository's complete supported gate. A current framework checkout commonly exposes:
-
-```sh
-pnpm check:versions
-pnpm typecheck
-pnpm test
-pnpm build
-```
-
-Use only scripts present in the local repository. Test success, validation failure, rollback, authorized and unauthorized users, update/delete/reference behavior, and Extension enabled/disabled behavior. For async Functions, also test service failures, timeouts, non-success responses, limits, and database state around explicit transactions.
+Do not create or alter real production business data for testing without explicit authorization.
 
 ## Report the result
 
-Lead with the implemented user outcome. Summarize artifacts added or changed, ownership layer and Extension decisions, security coverage, validation commands and results, and any migration, backup, or beta risk. Mention assumptions or skipped checks explicitly.
+Summarize the endpoint and environment, App/Model/layer, objects created or changed, Extension decisions, security coverage, preview/apply result, generated-App checks, and any remaining migration, backup, permission, or Web Designer limitation.

@@ -1,6 +1,6 @@
 # Metadata design
 
-Use this reference for Apps, Models, layers, metadata identity, Extensions, schemas, and change sets.
+Use this reference for Apps, Models, layers, metadata identity, Extensions, and Web Designer change sets.
 
 ## Core model
 
@@ -60,7 +60,7 @@ Recent canonical names use `<AppPrefix>_<ModelName>_<BaseName>_Extension`. Prese
 
 ## Schema and storage safety
 
-Supported base concepts include apps, enums, tables, forms, menus, privileges, duties, roles, Scripts, Functions, and reports. Obtain the exact kinds and properties from the live schema.
+Supported base concepts include Apps, enums, tables, forms, menus, privileges, duties, roles, Scripts, Functions, and reports. Use only object kinds and properties exposed by the running Web Designer version.
 
 Schema synchronization is additive for new tables, fields, and indexes. Removing or changing existing structures requires an explicit migration and verified backup. Never edit generated SQLite structure manually. Do not declare framework audit fields as application fields.
 
@@ -68,15 +68,13 @@ Artifact names are global identities during beta; avoid reusing a name across Ap
 
 ## Atomic change-set flow
 
-Use a change set for an App plus its dependent tables, forms, menus, and security artifacts:
+Use Web Designer's generated change set for an App plus its dependent tables, forms, menus, and security artifacts:
 
-1. Capture the current workspace revision or Designer snapshot revision.
-2. Build the smallest ordered set of create/update/delete operations.
-3. Validate against the current schema and workspace.
+1. Inspect the current App, Model, layer, and objects before editing.
+2. Build the smallest ordered set of Web Designer changes.
+3. Save the draft and let Web Designer validate it.
 4. Review the preview diff, warnings, and high-risk flags.
-5. Apply the exact preview only after human confirmation.
-
-Designer API installations expose a similar flow through snapshot, validate, and apply endpoints. Do not call remote mutation endpoints unless the user has placed that environment in scope and authorized the change.
+5. Apply the exact preview only with authority appropriate to the environment and risk.
 
 ## Design review
 

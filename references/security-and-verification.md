@@ -32,16 +32,7 @@ Test with both an administrator and realistic non-administrator accounts.
 | Extensions | enabled/disabled, interaction with other Extensions, clean removal |
 | Async integration | success, rejection, timeout, limits, explicit transaction boundaries |
 
-Run focused tests while iterating. Before delivery, use the repository's available equivalents of:
-
-```sh
-pnpm check:versions
-pnpm typecheck
-pnpm test
-pnpm build
-```
-
-For deployment-related changes, also validate the deployment configuration and relevant update/smoke path.
+Run focused checks through the generated App while iterating. Reopen affected objects in Web Designer after save/apply and verify the effective result rather than trusting the preview alone.
 
 ## Release checklist
 
@@ -52,7 +43,7 @@ For deployment-related changes, also validate the deployment configuration and r
 - Test empty and changing dynamic lookup sources plus deleted references.
 - Handle a create-page Function action when no `recordId` exists.
 - Verify async failure and explicit-transaction behavior.
-- Export/package source-controlled metadata or retain it in version control.
+- Export the App/Model package when the installed Web Designer supports packaging, or document how the customization is backed up and promoted.
 - Back up `data.db` and `designer.db` before risky schema or deployment changes.
 - If SMTP is configured, preserve `.emu-secret.key` or `EMU_SECRET_KEY_PATH` separately; `.emubackup` excludes it.
 
