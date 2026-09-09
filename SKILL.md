@@ -33,7 +33,7 @@ Tell the user to create an ordinary dedicated account for AI-assisted customizat
 - Leave `canOpen=false` unless the task explicitly includes generated-App verification. `canCustomize` never grants runtime or business-data access.
 - When runtime verification is required, add `canOpen=true` plus the smallest Role/Duty/Privilege set for the specific Forms, tables, Functions, Reports, or Views being tested.
 - Do not recommend `FW_SystemAdminRole` for routine AI work.
-- Do not recommend `FW_FrameworkUser`; in v0.1.1.0 it is a legacy marker and no longer grants a Designer bypass.
+- Do not recommend `FW_FrameworkUser`; since v0.1.1.0 it is a legacy marker and no longer grants a Designer bypass.
 - Never use generic Data or import/export endpoints for `FW_User`, `FW_UserRole`, `FW_AppAccess`, sessions, migration records, Designer storage, or View tokens.
 
 Never request or expose passwords, cookies, tokens, setup codes, or secret values. Prefer an existing signed-in browser session or credentials configured in environment variables or a secret store that the HTTP client can use without printing them.
@@ -88,7 +88,9 @@ Tables -> Extensions/hooks/Functions -> Privileges
 
 The App and Model already exist and are not operations in the change set. Put the exact user-provided `app`, `model`, and `layer` on every artifact that supports them.
 
-Prefer an Extension for additive customization of an existing artifact. Require the Extension Layer to be strictly higher than the target Layer and preserve the App dependency boundary. Never copy a base artifact merely to add supported fields, layout, menu, security, or Script behavior.
+Prefer an Extension for additive customization of an existing artifact. Require the Extension Layer to be strictly higher than the target Layer and preserve the App dependency boundary. In v0.1.4.0, inspect inherited layers as read-only and emit only the current Layer delta; target Form/Menu presentation elements by stable ID. Never copy a base artifact merely to add supported fields, layout, menu, View, Chart, security, Script, or Function behavior.
+
+Reject `mandatory: true` on Enum or read-only fields. Use `viewExtension`, `chartExtension`, and `functionExtension` only when the live capabilities schema exposes them, and review Function Extension code as executable Chain-of-Command behavior.
 
 For a View, grant the View name and read permission to every source table. For a Chart, secure its referenced View; Chart permission is inherited from that View. For a Form Chart, validate every record/literal parameter binding and App dependency.
 

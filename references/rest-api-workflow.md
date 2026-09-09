@@ -35,11 +35,11 @@ The App-scoped snapshot returns the visible App manifest and Designer artifacts.
 
 `PUT /api/designer/artifacts/:kind/:name` performs an idempotent upsert. URL `kind` and `name` are authoritative. Successful create/update normally returns `200`.
 
-View and Chart are supported artifact kinds in v0.1.1.0. Obtain their exact schemas from capabilities and load [views-and-charts.md](views-and-charts.md) before designing them.
+View and Chart are supported artifact kinds in v0.1.4.0, together with delta-only View and Chart Extensions. Obtain their exact schemas from capabilities and load [views-and-charts.md](views-and-charts.md) before designing them.
 
 Changes rebuild runtime metadata and additive schema immediately without a restart. Do not use direct mutation endpoints when `capabilities.ai.apply=false`. Do not use a series of direct calls for a multi-artifact feature unless partial completion is acceptable and explicitly authorized.
 
-Always include the fixed target `app`, `model`, and `layer` on every business artifact that supports them. New Apps have no default Model, and v0.1.1.0 rejects business artifacts without an existing explicit Model.
+Always include the fixed target `app`, `model`, and `layer` on every business artifact that supports them. New Apps have no default Model, and current versions reject business artifacts without an existing explicit Model.
 
 ## Prefer atomic change sets
 

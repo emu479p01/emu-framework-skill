@@ -27,7 +27,7 @@ Do not silently combine contracts from different versions. If they disagree, fol
 
 ## Bundled baseline
 
-These references target official EmuFramework documentation and framework source version `0.1.1.0 (Beta)`, inspected together on 2026-07-18. The running instance's capabilities and schemas remain authoritative.
+These references target official EmuFramework documentation and framework source version `0.1.4.0 (Beta)`, inspected together on 2026-08-14. The running instance's capabilities and schemas remain authoritative.
 
 Before relying on version-sensitive details such as Web Designer controls, metadata fields, supported artifact kinds, service limits, or security behavior, verify them against the running instance. If the UI does not reveal the answer, consult current official documentation and state the version used.
 

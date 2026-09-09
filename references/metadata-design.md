@@ -19,7 +19,7 @@ App
 
 Declare cross-app dependencies explicitly. App dependency order controls load order and whether cross-app Extensions are allowed.
 
-Every App created in v0.1.1.0 starts with `models: []`, including names such as `erp`, `erp.credit`, and `web`. The user must add a Model and choose its Layer before creating any business artifact. Put the exact `app`, `model`, and matching `layer` on every supported artifact.
+Every App created in current versions starts with `models: []`, including names such as `erp`, `erp.credit`, and `web`. The user must add a Model and choose its Layer before creating any business artifact. Put the exact `app`, `model`, and matching `layer` on every supported artifact.
 
 ## Layer order
 
@@ -39,13 +39,14 @@ A higher-layer base artifact replaces a lower-layer base artifact with the same 
 
 ## Extension rules
 
-Use an Extension when a feature adds fields, indexes, enum values, form behavior, menu items, permissions, or Script behavior and must remain independently removable.
+Use an Extension when a feature adds fields, indexes, enum values, form behavior, menu items, View columns, Chart measures, permissions, or Script/Function behavior and must remain independently removable.
 
-Supported Extension kinds in v0.1.1.0 are:
+Supported Extension kinds in v0.1.4.0 are:
 
 ```text
 tableExtension, enumExtension, formExtension, menuExtension,
-privilegeExtension, dutyExtension, roleExtension, scriptExtension
+privilegeExtension, dutyExtension, roleExtension, scriptExtension,
+viewExtension, chartExtension, functionExtension
 ```
 
 Enforce all of these constraints:
@@ -55,16 +56,20 @@ Enforce all of these constraints:
 - Declare a direct or transitive dependency when targeting another App.
 - Allow only one Extension of a given kind for the same `(app, model, kind, target)`.
 - Add only the required contributions; do not copy the base definition.
+- Treat inherited layers as read-only and save only the current Layer delta.
+- Target Form groups/actions/Charts/lines and menu items by stable ID when overriding labels, visibility, order, or icons.
 - Test with the Extension enabled and disabled.
 - Ensure removal leaves no orphaned references.
 
-Recent canonical names use `<AppPrefix>_<ModelName>_<BaseName>_Extension`. Preserve legacy names rather than silently renaming them.
+Canonical names use `<AppPrefix>_<ModelName>_<BaseName>_Extension`. The v0.1.4.0 migration may canonicalize an unambiguous legacy name; preserve any remaining warned legacy name until a human reviews the rename and references.
 
 ## Schema and storage safety
 
 Supported base concepts include Apps, enums, tables, Forms, menus, Privileges, Duties, Roles, Scripts, Functions, Reports, Views, and Charts. Use only object kinds and properties exposed by the running Web Designer version.
 
 Schema synchronization is additive for new tables, fields, and indexes. Removing or changing existing structures requires an explicit migration and verified backup. Never edit generated SQLite structure manually. Do not declare framework audit fields as application fields.
+
+Enum and read-only fields must be optional. Trusted Functions and Scripts may populate read-only fields, but REST writes and generated Forms cannot edit them.
 
 Artifact names are global identities during beta; avoid reusing a name across Apps.
 

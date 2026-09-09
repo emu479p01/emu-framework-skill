@@ -20,7 +20,7 @@ Create the App and a dedicated Model, then choose its Layer:
 
 Record the exact App name, Model name, and Layer. The AI will not create or guess them.
 
-In v0.1.1.0, every new App starts with zero Models. Add the Model explicitly; Apps named `erp`, `erp.credit`, or `web` receive no special default.
+Every new App starts with zero Models. Add the Model explicitly; Apps named `erp`, `erp.credit`, or `web` receive no special default.
 
 ### 2. Create a dedicated AI-assistance user
 
@@ -32,7 +32,7 @@ canCustomize = true
 
 This is sufficient for Designer inspection and validation. `canCustomize` does not grant App entry or business-data access.
 
-Avoid assigning `FW_SystemAdminRole` or `FW_FrameworkUser` for routine AI work. `FW_SystemAdminRole` is the only global bypass; `FW_FrameworkUser` is a legacy marker in v0.1.1.0.
+Avoid assigning `FW_SystemAdminRole` or `FW_FrameworkUser` for routine AI work. `FW_SystemAdminRole` is the only global bypass; `FW_FrameworkUser` has been a legacy marker since v0.1.1.0.
 
 Only when generated-App verification is genuinely required, add `canOpen=true` plus the minimum Role/Privilege permissions for the Forms, tables, Functions, Reports, or Views being tested.
 
@@ -88,7 +88,7 @@ Start a new Codex task after installation.
 
 ## API support
 
-EmuFramework v0.1.1.0 supports:
+EmuFramework v0.1.4.0 supports:
 
 - `POST /api/designer/artifacts` — create one metadata artifact; success `201`, duplicate `409`
 - `PUT /api/designer/artifacts/:kind/:name` — idempotent upsert
@@ -103,10 +103,10 @@ EmuFramework v0.1.1.0 supports:
 
 The Skill prefers the change-set workflow because several direct artifact calls can leave a partially completed design if a later call fails.
 
-View and Chart are supported metadata artifact kinds in v0.1.1.0. Interactive View verification requires all three runtime gates: `canOpen`, a View Privilege, and read permission for every source table. Chart access is inherited from its View. Power BI service tokens remain human-administered and outside the Skill's secret handling.
+View and Chart are supported metadata artifact kinds. v0.1.4.0 also supports delta-only View, Chart, and Function Extensions. Interactive View verification requires all three runtime gates: `canOpen`, a View Privilege, and read permission for every source table. Chart access is inherited from its View. Power BI service tokens remain human-administered and outside the Skill's secret handling.
 
-In v0.1.1.0, the capabilities response declares AI inspection and validation support while AI apply, business-data access, and executable Scripts are disabled. The Skill obeys those runtime flags rather than bypassing them. The human owns apply confirmation.
+The capabilities response declares the live AI inspection, validation, apply, business-data, and executable-metadata policies. The Skill obeys those flags rather than bypassing them. The human owns apply confirmation when apply is disabled.
 
 ## Documentation baseline
 
-The bundled guidance is based on official [EmuFramework documentation](https://github.com/emu479p01/emu-framework-docs) and framework source version `0.1.1.0 (Beta)`. The running instance's capabilities and schemas are authoritative.
+The bundled guidance is based on official [EmuFramework documentation](https://github.com/emu479p01/emu-framework-docs) and framework source version `0.1.4.0 (Beta)`. The running instance's capabilities and schemas are authoritative.

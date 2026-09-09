@@ -6,7 +6,7 @@ Use this reference when a feature needs a declarative query, a reusable visualiz
 
 A View is a virtual query executed at request time. Use only the schema returned by `/api/designer/capabilities`; never submit raw SQL, a subquery, window function, or computed expression.
 
-Supported v0.1.1.0 concepts are:
+Supported v0.1.4.0 concepts are:
 
 - one source `{ table, alias }`
 - `inner` or `left` joins with field-equality `on` pairs
@@ -48,6 +48,8 @@ A Chart references one View and maps its output columns:
 - optional `legend` and `stacked`
 
 A KPI must have exactly one measure. Chart permission is inherited from its View; there is no separate Chart list in a Privilege.
+
+Use `viewExtension` to add joins, columns, filters, or ordering and to override output-column labels. Do not replace inherited source, parameters, or grouping. Use `chartExtension` to add measures, set legend/stacking, or override measure labels/colors; do not replace inherited type, View, or dimension. Both must contain only the current higher-Layer delta exposed by the live schema.
 
 To embed the Chart, add `FormMeta.charts` or a Form Extension contribution. Choose `half` or `full` width and bind each required View parameter from a current-record field or literal. Validate field/parameter type compatibility, duplicate bindings, required bindings, and App dependencies. A missing required record value on an unsaved record should produce the save-first state, not a malformed request.
 
