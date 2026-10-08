@@ -6,7 +6,7 @@ Use this reference when a feature needs a declarative query, a reusable visualiz
 
 A View is a virtual query executed at request time. Use only the schema returned by `/api/designer/capabilities`; never submit raw SQL, a subquery, window function, or computed expression.
 
-Supported v0.1.4.0 concepts are:
+Supported v1.4.0 concepts are:
 
 - one source `{ table, alias }`
 - `inner` or `left` joins with field-equality `on` pairs
@@ -15,7 +15,7 @@ Supported v0.1.4.0 concepts are:
 - filters whose value is a literal, literal array, or named parameter
 - `groupBy` field references and `orderBy` output-column names
 
-Use aliased field references such as `o.customerId`. Define parameters before filters that reference them. Group every selected non-aggregate field when aggregate columns are present. The validator rejects unknown/protected tables, unknown fields, incompatible types, duplicate aliases/columns, invalid grouping, and undeclared cross-App dependencies.
+Use aliased field references such as `o.customerId`. The virtual audit aliases `o.sys_createdBy`, `o.sys_createdAt`, `o.sys_modifiedBy`, and `o.sys_modifiedAt` are valid references on any source table, typed `string` for `By` and `datetime` for `At`; never add them as table fields. Datetime columns are UTC. `encrypted` fields cannot be used in a View. Define parameters before filters that reference them. Group every selected non-aggregate field when aggregate columns are present. The validator rejects unknown/protected tables, unknown fields, incompatible types, duplicate aliases/columns, invalid grouping, and undeclared cross-App dependencies.
 
 ## Secure a View
 

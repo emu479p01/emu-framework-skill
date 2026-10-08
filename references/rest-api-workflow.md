@@ -1,67 +1,78 @@
-# Designer REST API workflow
+# REST API workflow
 
-Use this reference for secure authentication, discovery, artifact endpoints, atomic change sets, status codes, and Record API boundaries.
+Use this reference for authentication, discovery, change-set validation, proposals, status codes, and Record API boundaries. Endpoint paths below were verified against EmuFramework v1.4.0 (`server.ts`, `designer.ts`, `aiApi.ts`). The running instance's capabilities remain authoritative.
+
+## Choose one path
+
+| | Designer API | AI REST proposal API |
+| --- | --- | --- |
+| Base path | `/api/designer/*` | `/api/v1/ai/*` |
+| Credential | Session cookie from `POST /api/login` for the dedicated user | `Authorization: Bearer emu_ai_<secret>` |
+| Scope | Apps where the user has `canCustomize` | Apps, scopes, and expiry fixed at token creation |
+| AI can apply? | No. `capabilities.ai.apply=false` | No. There is no apply endpoint |
+| Executable artifacts | Rejected for `source: "ai"` (`ai.scripts=false`) | Allowed in proposals as reviewed code (`executableArtifacts: true`) |
+| Human step | Apply with `confirmation: true` as the same username that validated | Review and approve in **Web Designer, AI Proposals** |
+
+Use the path the user provides. Do not mix credentials, and do not request a second credential to escape a limit. Prefer the AI REST path when a token exists: proposals are persistent, audited, and reviewable by any customizer with access to every affected App.
+
+Neither path may create Apps, change Model definitions, apply changes, or read business records.
 
 ## Authenticate without exposing secrets
 
-The default server URL is `http://localhost:3399` unless `PORT` or deployment routing changes it.
+Use the base URL the user supplies. The framework default is `http://localhost:3399` unless `PORT` or the Docker port mapping changes it. Production deployment is Docker-only.
 
-`POST /api/login` accepts `username` and `password`, then returns an HTTP-only session cookie. Keep one cookie jar or WebRequestSession for subsequent calls. Read credentials only from a user-prepared secure mechanism; never print them or place literal secrets in generated commands, files, logs, or chat.
+- Designer path: `POST /api/login` with `username` and `password` returns an HTTP-only session cookie. Keep one cookie jar. Read credentials only from a user-prepared secure mechanism; never print them or place literals in commands, files, logs, or chat.
+- AI path: read the token from an environment variable or secret store and send it only in the Bearer header. Never place it in a URL, file, log, or chat. A System Administrator creates it under **Settings, Users & Security, AI REST tokens**; the secret is shown once and only its SHA-256 hash is stored. If it may have leaked, tell the user to revoke it and create a replacement.
+- An unauthenticated or invalid request is denied (`401`). A valid session still needs `canCustomize` (or `FW_SystemAdminRole`) for Designer metadata; otherwise `403`.
 
-An unauthenticated request is denied. A valid session still needs App-scoped `canCustomize` for Designer metadata. Runtime Record/View calls separately require `canOpen` plus the matching Role/Privilege permissions.
+Never call `/api/system/ai-tokens*`, `/api/designer/ai-proposals/:id/approve`, `/reject`, or `DELETE /api/designer/ai-proposals/:id`. Token management is administrator-only, and approval or removal of a proposal is the human review step even if the session technically permits it.
 
 ## Run preflight discovery
 
-Call in this order:
+Designer path, in order:
 
 ```text
 GET /api/designer/capabilities
 GET /api/designer/snapshot?app=<App>
 ```
 
-Capabilities returns framework version, current revision, artifact/change-set schemas, preview TTL, human-confirmation requirements, and AI permissions. Treat it as the live API contract.
+- `capabilities` returns `version`, `revision`, `changeSets` (`version`, `previewTtlSeconds`, `humanConfirmationRequired`), the `ai` flags (`inspect`, `validate`, `apply`, `businessData`, `scripts`), and the `schemas.artifact` and `schemas.changeSet` JSON Schemas.
+- `snapshot?app=` returns `revision`, the visible App manifests in `apps`, and the Designer-stored `artifacts` for that App. A request for an App outside the account's scope returns empty `apps` and `artifacts` instead of an error; treat that as a scope mismatch and stop.
 
-The App-scoped snapshot returns the visible App manifest and Designer artifacts. Verify the exact user-provided App, Model, and Layer. Stop if the App/Model is missing, the Layer differs, or the account sees an unexpected scope.
+Optional Designer reads: `GET /api/designer/artifacts?app=&model=&kind=&cursor=&limit=&includeCatalog=false` (paginated, ETag, `revision` query for `304`; follow `nextCursor`), `GET /api/designer/catalog?app=&kind=`, and `GET /api/designer/customization/:kind/:name?app=&model=` (inherited layers and the effective merged artifact for table, enum, form, report, view, chart, menu, privilege, duty, role, script, function, dataEntity; layers marked `editable` are the only ones the fixed scope may touch).
 
-## Understand direct artifact endpoints
+AI path, in order:
 
-`POST /api/designer/artifacts` creates one complete supported artifact when AI mutation is permitted. It returns:
+```text
+GET /api/v1/ai/capabilities              (inspect)
+GET /api/v1/ai/schemas/artifact          (inspect)
+GET /api/v1/ai/schemas/change-set        (inspect)
+GET /api/v1/ai/workspace?app=&model=&kind=&cursor=&limit=   (inspect)
+```
 
-- `201` on success
-- `400` for missing body or unsupported kind
-- `403` outside the user's customization scope
-- `409` when the global artifact name already exists
-- `422` for schema, reference, registry, dependency, or layer validation failure
+- `capabilities` returns `version`, `changeSetVersion`, the token's `scopes` and `apps`, `apply: false`, `businessData: false`, and `executableArtifacts`. Stop if the target App is not in `apps` or the needed scope (`validate`, `propose`) is missing.
+- `workspace` returns `revision`, `artifacts`, `nextCursor`, `total`. Default page 100, maximum 500. Follow `nextCursor` until `null`; the first page is not the whole workspace. Request with `app=<App>` and `model=<Model>` filters. It lists Designer-stored artifacts only; framework or file-based artifacts are not included, so a missing base artifact means stop and ask.
 
-`PUT /api/designer/artifacts/:kind/:name` performs an idempotent upsert. URL `kind` and `name` are authoritative. Successful create/update normally returns `200`.
+Verify the App exists, the Model exists in it, the Model Layer equals the user's Layer, and nothing outside the scope contract is needed. Stop on any mismatch.
 
-View and Chart are supported artifact kinds in v0.1.4.0, together with delta-only View and Chart Extensions. Obtain their exact schemas from capabilities and load [views-and-charts.md](views-and-charts.md) before designing them.
+## Identity and placement
 
-Changes rebuild runtime metadata and additive schema immediately without a restart. Do not use direct mutation endpoints when `capabilities.ai.apply=false`. Do not use a series of direct calls for a multi-artifact feature unless partial completion is acceptable and explicitly authorized.
+Every non-App artifact must carry `kind`, `name`, `app`, and `model`; include `layer` equal to the Model's Layer (the effective Layer always comes from the Model, so changing the payload's `layer` alone never moves an artifact). Names match `^[A-Za-z_][A-Za-z0-9_.-]*$`, start with the App prefix (`sales` uses `SALES_`; `erp.credit` uses `ERP_`), and are global identities. `kind` cannot change after creation. Schemas set `additionalProperties: false`, so a misspelled property is an error. A missing or unknown Model returns `422`.
 
-Always include the fixed target `app`, `model`, and `layer` on every business artifact that supports them. New Apps have no default Model, and current versions reject business artifacts without an existing explicit Model.
-
-## Prefer atomic change sets
-
-Build this shape using the exact schema returned by capabilities:
+## Build and validate a change set
 
 ```json
 {
   "version": 1,
-  "baseRevision": "<snapshot revision>",
+  "baseRevision": "<revision from snapshot or workspace>",
   "source": "ai",
   "description": "Add the approved feature",
   "operations": [
     {
-      "op": "upsert",
-      "kind": "enum",
-      "name": "SALES_OrderPriority",
+      "op": "upsert", "kind": "enum", "name": "SALES_OrderPriority",
       "artifact": {
-        "kind": "enum",
-        "name": "SALES_OrderPriority",
-        "app": "sales",
-        "model": "AICustomizations",
-        "layer": "CUS",
+        "kind": "enum", "name": "SALES_OrderPriority",
+        "app": "sales", "model": "AICustomizations", "layer": "CUS",
         "values": [{ "name": "Normal", "value": 0 }]
       }
     }
@@ -69,16 +80,41 @@ Build this shape using the exact schema returned by capabilities:
 }
 ```
 
-Validate with `POST /api/designer/change-sets/validate`. Review `diagnostics`, `registryErrors`, `warnings`, `diff`, `schemaEffects`, `destructive`, `previewId`, and expiry.
+- Operations are `upsert` (artifact identity must equal the operation's `kind`/`name`) or `delete`. Include every new dependency in the same set.
+- Always set `source: "ai"`. Never use `designer` or `cli` to get past the executable-artifact restriction.
+- Designer path: `POST /api/designer/change-sets/validate`. A valid response carries `previewId`, `expiresAt` (10 minutes), `diff`, `schemaEffects`, `warnings`, `diagnostics`, `registryErrors`, and the next revision. Invalid returns `422`.
+- AI path: `POST /api/v1/ai/change-sets/validate` returns `200` for valid and `422` for invalid, with the safe diff, but no `previewId`.
+- Diagnostics carry a JSON path and code. A `stale_revision` code means refetch the revision and rebuild. Review `highRisk` items: delete of a table or App, and every Script, Function, or their Extensions.
+- Validation does not execute or compile Script or Function code (bodies are blanked for the preview). Review that code yourself for syntax and for the synchronous-handler rule in [business-logic.md](business-logic.md).
+- Do not use `DELETE` operations or table removal unless the user explicitly asked; deleting metadata leaves physical tables as orphans, and purging is a Framework Administrator action.
 
-Never change `source` from `ai` to `designer` to bypass executable-code restrictions. Re-fetch the snapshot and rebuild after a stale-revision error.
+## Submit for human review
 
-`POST /api/designer/change-sets/apply` requires a valid unexpired preview owned by the same username, `confirmation: true`, separate `confirmHighRisk: true` for high-risk items, and an unchanged base revision. Obey `capabilities.ai.apply`; when false, give the preview details to the human and require a human-controlled apply request under that same username. Web Designer may be used when the installed version exposes the preview.
+AI path: `POST /api/v1/ai/proposals` (needs `propose`) with the same validated change set. It returns `201` with `{ id, status: "pending", preview }`, or `422` with diagnostics. Give the user the proposal `id`, the diff summary, warnings, and high-risk items. A customizer with `canCustomize` on every affected App approves or rejects it in **Web Designer, AI Proposals** (the Proposal Inbox). Approval revalidates against the current workspace; a stale revision returns `409`. Rebuild and resubmit after any rejection or conflict.
 
-## Separate Metadata and Record APIs
+Designer path: give the user the `previewId`, expiry, and diff. The human submits `POST /api/designer/change-sets/apply` as the same username with `confirmation: true` (and `confirmHighRisk: true` when any item is high-risk) before expiry. Errors: `400` missing confirmation, `403` another user's preview, `409` changed workspace, `410` expired preview.
 
-Use Designer endpoints for metadata. `POST /api/data/:table` creates a business Record and returns `201`, but the authenticated user's table `create` permission, field rules, hooks, and validation still apply.
+If `ai.apply` is ever reported `true`, still require explicit user approval for production, unknown environments, destructive changes, or scope expansion.
 
-Obey `capabilities.ai.businessData`. When false, do not call Record APIs. Even when true, require explicit authorization before creating test data and never use real production data casually.
+## Direct artifact endpoints
 
-Never call generic Data, import, or export endpoints for security/credential storage: `FW_User`, `FW_UserRole`, `FW_AppAccess`, `FW_Session`, `FW_WebArtifact`, `FW_Migration`, `FW_ViewToken`, or `FW_ViewTokenScope`. User administration, password changes, and View-token lifecycle use dedicated human-administered APIs and are outside normal App-building work.
+`POST /api/designer/artifacts` (create-only, `201`, `409` duplicate), `PUT /api/designer/artifacts/:kind/:name` (idempotent upsert; URL kind and name win; send the complete artifact), and `DELETE /api/designer/artifacts/:kind/:name` exist on the Designer path. Do not call them: AI apply is disabled in 1.4.0, and a series of direct calls leaves partial designs. Use a change set. Model definitions (`PUT/DELETE /api/designer/artifacts/model/:app/:model`) belong to the user.
+
+## Status codes
+
+| Status | Meaning |
+| ---: | --- |
+| `200`/`201` | OK / created (artifact or proposal) |
+| `400` | Missing input, missing confirmation, unknown scope, or unsupported kind |
+| `401` | Missing, invalid, expired, or revoked session or token |
+| `403` | No Customize/App access, token lacks scope or App, or Framework metadata (read-only) |
+| `404` | Unknown route resource |
+| `409` | Duplicate, stale workspace or proposal, concurrent job |
+| `410` | Preview expired |
+| `422` | Schema, placement, or registry validation failed; read `diagnostics` and `registryErrors` |
+
+## Separate metadata and Record APIs
+
+Use Designer or AI endpoints for metadata. `ai.businessData=false` always holds in 1.4.0 and the AI token has no record endpoint, so do not call `/api/data/*` at all unless the user separately authorizes a verification step and a session with runtime permissions. When allowed, `POST /api/data/:table/drafts` plus `POST /api/data/:table/drafts/:token/save` is the create flow the generated UI uses; `POST /api/data/:table` also creates a record. Hooks, field rules, and permissions still apply, and you must never use real production data casually. Never call business-data exchange routes either: `/api/data-entities/*`, `/api/attachments/*`, import/export, archive, or data-management routes.
+
+Never call generic Data, import, or export endpoints for security and framework tables: `FW_User`, `FW_UserRole`, `FW_AppAccess`, `FW_Session`, `FW_WebArtifact`, `FW_NavigationItem`, `FW_Blob`, `FW_Attachment`, `FW_Migration`, `FW_ViewToken`, `FW_ViewTokenScope`, `FW_DataJob`, `FW_ArchivePolicy`, or the AI token and proposal tables. User administration, password changes, View-token lifecycle, license import, and AI-token lifecycle use dedicated human-administered screens.
